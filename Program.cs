@@ -1,4 +1,5 @@
-﻿using System.Linq.Expressions;
+﻿using System.ComponentModel.Design;
+using System.Linq.Expressions;
 
 List<Product> products = new List<Product>()
 {
@@ -7,84 +8,96 @@ List<Product> products = new List<Product>()
     Name = "Cloak of Invisibility",
     Price = 19.99M,
     Available = false,
-    ProductTypeId = 1
+    ProductTypeId = 1,
+    DateStocked = new DateTime(2023, 9, 23)
     },
     new Product()
     {
     Name = "Boots of Fire Resistance",
     Price = 29.99M,
     Available = true,
-    ProductTypeId = 1
+    ProductTypeId = 1,
+    DateStocked = new DateTime(2023, 10, 11)
     },
     new Product()
     {
     Name = "Wizards Hat of Wisdom",
     Price = 21.99M,
     Available = true,
-    ProductTypeId = 1
+    ProductTypeId = 1,
+    DateStocked = new DateTime(2023, 10, 31)
     },
     new Product()
     {
     Name = "Healing Potion",
     Price = 99.99M,
     Available = false,
-    ProductTypeId = 2
+    ProductTypeId = 2,
+    DateStocked = new DateTime(2023, 11, 1)
     },
     new Product()
     {
     Name = "Invincibility Potion",
     Price = 199.99M,
     Available = true,
-    ProductTypeId = 2
+    ProductTypeId = 2,
+    DateStocked = new DateTime(2023, 10, 1)
     },
     new Product()
     {
     Name = "Levitation Potion",
     Price = 39.99M,
     Available = true,
-    ProductTypeId = 2
+    ProductTypeId = 2,
+    DateStocked = new DateTime(2023, 11, 11)
     },
     new Product()
     {
     Name = "Mirror of Truth",
     Price = 9.99M,
     Available = true,
-    ProductTypeId = 3
+    ProductTypeId = 3,
+    DateStocked = new DateTime(2023, 9, 10)
     },
     new Product()
     {
     Name = "Crystal Ball of Knowledge",
     Price = 3.99M,
     Available = true,
-    ProductTypeId = 3
+    ProductTypeId = 3,
+    DateStocked = new DateTime(2023, 10, 4)
     },
     new Product()
     {
     Name = "Flying Broomstick",
     Price = 59.99M,
     Available = true,
-    ProductTypeId = 3
+    ProductTypeId = 3,
+    DateStocked = new DateTime(2023, 9, 19)
     },
     new Product()
     {
     Name = "Elder Wand",
     Price = 299.99M,
     Available = true,
-    ProductTypeId = 4
+    ProductTypeId = 4,
+    DateStocked = new DateTime(2023, 10, 2)
     },
     new Product()
     {
     Name = "Phoenix Feather Wand",
     Price = 149.99M,
     Available = true,
-    ProductTypeId = 4
+    ProductTypeId = 4,
+    DateStocked = new DateTime(2023, 9, 1)
     },
     new Product()
     {
     Name = "Crystal Wand of Elemental Mastery",
     Price = 8.99M,
     Available = false,
-    ProductTypeId = 4
+    ProductTypeId = 4,
+    DateStocked = new DateTime(2023, 10, 28)
     },
 
 };
@@ -123,13 +136,14 @@ string choice = null;
 while (choice != "0")
 {
     Console.WriteLine(@"
-    Select an option:
-        0. Exit
-        1. View All Products
-        2. Add a Product To Inventory
-        3. Delete a Product From Inventory
-        4. Update a Products Details
-        5. Search by Product Type"
+Select an option:
+    0. Exit
+    1. View All Products
+    2. Add a Product To Inventory
+    3. Delete a Product From Inventory
+    4. Update a Products Details
+    5. Search by Product Type
+    6. View Available Products"
     );
 
 
@@ -163,11 +177,15 @@ while (choice != "0")
             case 5:
                 SearchByType();
                 break;
+
+            case 6:
+                ViewAvailableProducts();
+                break;
         }
     }
     else
     {
-        Console.WriteLine("Invalid input. Enter a number between 0 and 4.");
+        Console.WriteLine("Invalid input. Enter a number between 0 and 7.");
     }
 
 }
@@ -178,7 +196,8 @@ void ListProducts()
 
     for (int i = 0; i < products.Count; i++)
     {
-        Console.WriteLine(@$"{i + 1}. {products[i].Name} {(products[i].Available ? $"is available for ${products[i].Price}" : "is not available")}.");
+        Console.WriteLine(@$"{i + 1}. {products[i].Name} {(products[i].Available ? $"is available for ${products[i].Price} and has been on shelves for {products[i].DaysOnShelf} days" : "is not available")}.");
+
     }
 }
 
@@ -213,6 +232,9 @@ void AddProductToInventory()
         newProduct.ProductTypeId = ProductTypeId;
     }
 
+    //Product Stock Date
+    newProduct.DateStocked = DateTime.Now;
+
     products.Add(newProduct);
 }
 
@@ -233,7 +255,7 @@ void DeleteProductFromInventory()
 
             products.RemoveAt(response - 1);
 
-            Console.WriteLine("Product successfully deleted.");
+            Console.WriteLine($"{gettingDeleted.Name} was successfully deleted.");
         }
         catch (FormatException)
         {
@@ -275,6 +297,19 @@ void UpdateProductProperties()
             {
                 Console.WriteLine($"Enter the new name for {chosenProduct.Name}:");
                 chosenProduct.Name = Console.ReadLine();
+
+                Console.WriteLine($"Enter the new price for {chosenProduct.Name}:");
+                chosenProduct.Price = decimal.Parse(Console.ReadLine());
+
+                Console.WriteLine(@"Enter a Product Type ID #
+                1. Apparel
+                2. Potions
+                3. Enchanted Objects
+                4. Wands");
+                chosenProduct.ProductTypeId = int.Parse(Console.ReadLine());
+                
+                
+                Console.WriteLine($"This product now has a new name of {chosenProduct.Name} and price of {chosenProduct.Price}.");
                 invalidChoice = false;
             }
         }
@@ -293,24 +328,13 @@ void SearchByType()
     3. Enchanted Objects
     4. Wands ");
 
-    int selectedType;
-
-    if(int.TryParse(Console.ReadLine().Trim(), out selectedType))
+    if (int.TryParse(Console.ReadLine().Trim(), out int selectedType))
     {
         List<Product> selectedProducts = products.Where(p => p.ProductTypeId == selectedType).ToList();
 
-        if (selectedProducts.Count > 0)
-        {
-            foreach (Product product in selectedProducts)
-            {
-                Console.WriteLine($"{product.Name}");
-            }
-        }
-        else
-        {
-            Console.WriteLine("No Matches.");
-        }
-         
+        selectedProducts.Select((p) => $"* {p.Name}")
+        .ToList().
+        ForEach(Console.WriteLine);
     }
     else
     {
@@ -318,5 +342,21 @@ void SearchByType()
             Console.WriteLine("Incorrect format. Please enter a number between 1 and 4.");
         }
     }
-    
+
 }
+
+//Example of using Where and Select to print available products to the console
+//Select is similar to map and Where is similar to filter
+void ViewAvailableProducts()
+{
+    Console.WriteLine("Only the available products:");
+
+    List<Product> unsoldProducts = products.Where(p => p.Available).ToList();
+
+    unsoldProducts
+         .Select((p) => $"* {p.Name}")
+         .ToList()
+         .ForEach(Console.WriteLine);
+
+}
+
